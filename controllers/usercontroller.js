@@ -1,45 +1,84 @@
-let router = require('express').Router();
-
-const { User } = require("../models");
+require("dotenv").config();
+const router = require('express').Router();
+const { UserModel } = require('../models');
+const { UniqueConstraintError } = require('sequelize/lib/errors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-
-/*****************
- * USER - SIGNUP
- ****************/
-router.post('/signup', function(req,res){
-    User.create({
-        email: req.body.user.email,
-        password: bcrypt.hashSync(req.body.user.password, 13)
-    })
-
-    .then( user => {
-
-        let token = jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24});
-
-        res.status(200).json({
-            user: user,
-            message: "New user has been created.",
-            sessionToken: token
+router.post("/register", async (req, res) => {
+    let{email, password} = req.body.user;
+    try{
+        const User = await UserModel.create({
+            email,
+            password: bcrypt.hashSync(password, 13),
         });
-    })
-    .catch(err => res.status(500).json({error :err}))
+
+        let token = jwt.sign({id: User.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24});
+
+        res.status(201).json({
+            message: "User successfully registered",
+            user: User,
+            SessionToken: token
+        });
+    }catch(err){
+        if(err instanceof UniqueConstraintError){
+            res.status(409).json({
+                message:"Email already in use",
+            });
+        }else{
+            res.status(500).json({
+                message: "Failed to register user",
+            });
+        }
+    }
 });
 
-module.exports = router;
+router.post("/login", async (req, res) => {
+    let{email, password} = req.body.user;
+    try{
+        let loginUser = await UserModel.findOne({
+            where:{
+                email: email,
+            },
+        });
 
-router.put('/emailedit', validateSession, function(req,res){
+        if(loginUser){
+            let passwordComparison = await bcrypt.compare(password, loginUser.password);
+
+            if(passwordComparison){
+                let token = jwt.sign({id: loginUser.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24});
+
+                res.status(200).json({
+                    user: loginUser,
+                    message: "User successfully logged in",
+                    SessionToken: token
+                });
+            }else{
+                res.status(401).json({
+                    message: "Incorrect email or password"
+                });
+            };
+        }else{
+            res.status(401).json({
+                message:"Incorrect email or password"
+            });
+        }
+    }catch(error){
+        res.status(500).json({
+            message: "Failed to log user in"
+        })
+    }
+});
+
+//Update User Email//
+router.put('/:id', async (req,res) => {
     const updateEmail = {
-        email: req.body.email
+        email: req.body.user.email
     };
-    const query = {where: { id: req.user.id }};
-    UserModel.update(updateEmail, query)
+    const query = {where: { id: req.params.id }};
+   let updatedUser = await UserModel.update(updateEmail, query)
     .then((user) => res.status(200).json(user))
     .catch((err) => res.status(500).json({ error: err }));
 });
-//will return as 0 or 1 (the number of things that have changed.  If you see this, it likely worked.)
 
-
-
-
+module.exports = router;

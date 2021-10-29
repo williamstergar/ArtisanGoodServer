@@ -1,25 +1,31 @@
 require("dotenv").config();
-const Express = require("express");
+const Express = require('express');
 const app = Express();
 const dbConnection = require("./db");
 
+app.use(Express.json());
+
+//const sequelize = require('./db')
+
 const controllers = require("./controllers");
+const artisanItem = require('./controllers/artisanitemcontroller')
+//const user = require('./controllers/usercontroller')
 
-app.use(Express.json());  
+//sequelize.sync();
 
-app.use("/user", controllers.userController);
+//app.use(require('./middleware/headers'))
 
-
-app.use(require("./middleware/validate-jwt"));
-// app.use("/log", controllers.logController);
+app.use('/user', controllers.userController)
+app.use('/artisanitem', artisanitem) //what are we stepping into here?
 
 dbConnection.authenticate()
-    .then(() => dbConnection.sync())
+    .then(() => dbConnection.sync()) //=> {force: true} {alter: true}
     .then(() => {
-app.listen(3001, () => {
-        console.log(`[Server]: App is listening on 3001.`);
-});  
-})
-.catch((err) => {
-console.log(`[Server]: Server crashed. Error = ${err}`);
-});
+        app.listen(3000, () =>{
+            console.log(`[Server]: App is listening on 3000.`);
+        });
+    })
+    .catch((err) => {
+        console.log(`[Server]: Server crashed. Error =${err}`);
+    })
+
