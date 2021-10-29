@@ -4,7 +4,7 @@ const { UserModel } = require('../models');
 const { UniqueConstraintError } = require('sequelize/lib/errors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
+const {validateSession} = require('../middleware/validate-jwt')
 router.post("/register", async (req, res) => {
     let{email, password} = req.body.user;
     try{
@@ -12,9 +12,7 @@ router.post("/register", async (req, res) => {
             email,
             password: bcrypt.hashSync(password, 13),
         });
-
         let token = jwt.sign({id: User.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24});
-
         res.status(201).json({
             message: "User successfully registered",
             user: User,
@@ -32,7 +30,6 @@ router.post("/register", async (req, res) => {
         }
     }
 });
-
 router.post("/login", async (req, res) => {
     let{email, password} = req.body.user;
     try{
@@ -41,13 +38,10 @@ router.post("/login", async (req, res) => {
                 email: email,
             },
         });
-
         if(loginUser){
             let passwordComparison = await bcrypt.compare(password, loginUser.password);
-
             if(passwordComparison){
                 let token = jwt.sign({id: loginUser.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24});
-
                 res.status(200).json({
                     user: loginUser,
                     message: "User successfully logged in",
@@ -69,5 +63,14 @@ router.post("/login", async (req, res) => {
         })
     }
 });
-
+//Update User Email//
+router.put('/:id', async (req,res) => {
+    const updateEmail = {
+        email: req.body.user.email
+    };
+    const query = {where: { id: req.params.id }};
+   let updatedUser = await UserModel.update(updateEmail, query)
+    .then((user) => res.status(200).json(user))
+    .catch((err) => res.status(500).json({ error: err }));
+});
 module.exports = router;
