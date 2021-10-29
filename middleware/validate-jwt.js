@@ -1,15 +1,4 @@
 const jwt = require('jsonwebtoken');
-const { UserModel } = require('../models');
-const validateSession = async (req, res, next) => {
-    if (req.method === 'OPTIONS') {
-        return next();
-    } else if (req.headers.authorization) {
-        const { authorization } = req.headers;
-        const payload = authorization ? jwt.verify(authorization, process.env.JWT_SECRET) : undefined;
-        if (payload) {
-        }
-    }
-}
 const {UserModel} = require('../models');
 const validateSession = async(req, res, next) => {
     if (req.method === 'OPTIONS') {
@@ -35,3 +24,6 @@ const validateSession = async(req, res, next) => {
     }
 };
 module.exports = validateSession;
+
+//needs Bearer token, maybe. 
+

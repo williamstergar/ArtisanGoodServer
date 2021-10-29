@@ -70,4 +70,15 @@ router.post("/login", async (req, res) => {
     }
 });
 
+//Update User Email//
+router.put('/:id', async (req,res) => {
+    const updateEmail = {
+        email: req.body.user.email
+    };
+    const query = {where: { id: req.params.id }};
+   let updatedUser = await UserModel.update(updateEmail, query)
+    .then((user) => res.status(200).json(user))
+    .catch((err) => res.status(500).json({ error: err }));
+});
+
 module.exports = router;
