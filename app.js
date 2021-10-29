@@ -10,7 +10,7 @@ const controllers = require("./controllers");
 app.use("/user", controllers.userController);
 
 dbConnection.authenticate()
-    .then(() => dbConnection.sync())
+    .then(() => dbConnection.sync()) //=> {force: true} {alter: true}
     .then(() => {
         app.listen(3000, () =>{
             console.log(`[Server]: App is listening on 3000.`);

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const router = require('express').Router();
 const { UserModel } = require('../models');
 const { UniqueConstraintError } = require('sequelize/lib/errors');
