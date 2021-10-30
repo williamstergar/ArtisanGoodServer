@@ -1,5 +1,5 @@
 module.exports={
-    userController:require('./usercontroller'),
-    artisanItemController:require('./artisanitemcontroller')
+    userController: require('./usercontroller'),
+    artisanItemController: require('./artisanitemcontroller')
    
 }

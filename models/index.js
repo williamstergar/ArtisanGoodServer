@@ -1,7 +1,7 @@
 const UserModel = require("./user");
-const ArtisanItemModel = require("./artisanitem");
+const ItemModel = require("./artisanitem");
 
 module.exports = {
     UserModel,
-    ArtisanItemModel
+    ItemModel
 };

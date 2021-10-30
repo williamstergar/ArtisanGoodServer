@@ -2,7 +2,7 @@ const {DataTypes} = require("sequelize");
 const db = require("../db");
   
   
-  const artisanItem = db.define("artisanitem", {
+  const ArtisanItem = db.define("artisanitem", {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -23,6 +23,9 @@ const db = require("../db");
       type: DataTypes.STRING(2000),
       allowNull: false,
     },
+    owner_id: {
+      type: DataTypes.INTEGER
+    }
   });
   
-module.exports = artisanItem;
+module.exports = ArtisanItem;
