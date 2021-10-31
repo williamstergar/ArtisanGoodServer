@@ -1,6 +1,7 @@
-module.exports = (sequelize, DataTypes) => {
-    const Product = sequelize.define("product", {
-      name: {
+const {DataTypes} = require("sequelize");
+const db = require("../db");
+const ArtisanItem = db.define("artisanitem", {
+    name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -17,10 +18,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       photoURL: {
-        type: DataTypes.STRING(2000), 
+        type: DataTypes.STRING(2000),
         allowNull: false,
       },
-  
+      owner_id: {
+          type: DataTypes.INTEGER
+      }
     });
-    return Product;
-  };
+    
+module.exports = ArtisanItem
