@@ -2,8 +2,9 @@ let express = require("express");
 let router = express.Router();
 let validateSession = require("../middleware/validate-jwt");
 const { ItemModel } = require("../models");
+
 // CREATE ARTISAN ITEM //
-router.post('/create', validateSession, async (req, res) => {
+router.post('/create', validateSession, async (req, res) => { //works
     const {name, price, description, availability, photoURL} = req.body;
     const { id } = req.user;
     const itemEntry = {
@@ -21,7 +22,8 @@ router.post('/create', validateSession, async (req, res) => {
         res.status(500).json({ error: err });
     }
 });
-router.get("/", async (req, res) => {
+
+router.get("/", async (req, res) => { //works
     try {
       const items = await ItemModel.findAll();
       res.status(200).json(items);
@@ -29,7 +31,7 @@ router.get("/", async (req, res) => {
       res.status(500).json({error: err});
     }
   });
-router.get("/mine", validateSession, async (req, res) => {
+  router.get("/mine", validateSession, async (req, res) => { //works
     let {id} = req.user;
     try {
       const userItems = await ItemModel.findAll({
@@ -42,17 +44,17 @@ router.get("/mine", validateSession, async (req, res) => {
       res.status(500).json({ error: err});
     }
 });
-router.get("/:name", async (req, res) => {
-  const {name} = req.params;
-  try {
-    const results = await ItemModel.findAll({
-      where: {name: name}
-    });
-    res.status(200).json(results);
-  } catch (err) {
-    res.status(500).json({ error: err});
-  }
-});
+router.get("/:name", async (req, res) => { //works
+    const {name} = req.params;
+    try {
+      const results = await ItemModel.findAll({
+        where: {name: name}
+      });
+      res.status(200).json(results);
+    } catch (err) {
+      res.status(500).json({ error: err});
+    }
+  });
   router.put("/update/:entryId", validateSession, async (req, res) => {
     const {name, price, description, availability, photoURL} = req.body.artisanItem;
     const itemId = req.params.entryId;
@@ -70,17 +72,20 @@ router.get("/:name", async (req, res) => {
       availability: availability,
       photoURL: photoURL,
     }
-    try{
+    try {
       const update = await ItemModel.update(updatedItem, query);
       res.status(200).json(update);
     } catch (err) {
       res.status(500).json({ error: err});
     }
   });
+
+
   // DELETE ARTISAN ITEM //
-    router.delete('/delete/:id', validateSession, async (req, res) => {
+router.delete('/delete/:id', validateSession, async (req, res) => {
     const userId = req.user.id;
     const itemId = req.params.id
+
     try {
         const query = {
             where: {

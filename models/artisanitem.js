@@ -1,6 +1,5 @@
 const {DataTypes} = require("sequelize");
 const db = require("../db");
-
 const ArtisanItem = db.define("artisanitem", {
     name: {
         type: DataTypes.STRING,
@@ -26,7 +25,5 @@ const ArtisanItem = db.define("artisanitem", {
           type: DataTypes.INTEGER
       }
     });
-
+    
 module.exports = ArtisanItem
-
-

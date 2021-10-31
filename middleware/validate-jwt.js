@@ -26,3 +26,4 @@ const validateSession = async(req, res, next) => {
 module.exports = validateSession;
 
 //needs Bearer token, maybe. 
+
