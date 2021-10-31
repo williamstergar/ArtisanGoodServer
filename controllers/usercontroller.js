@@ -4,9 +4,10 @@ const { UserModel } = require('../models');
 const { UniqueConstraintError } = require('sequelize/lib/errors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const validateSession = require('../middleware/validate-jwt')
 
 router.post("/register", async (req, res) => {
-    let{email, password} = req.body.user;
+    let{email, password} = req.body.user;  //consider to only use req.body
     try{
         const User = await UserModel.create({
             email,
@@ -69,5 +70,35 @@ router.post("/login", async (req, res) => {
         })
     }
 });
+
+
+//Update User Email//
+router.put('/updateemail/:id', async (req,res) => {
+    const updateEmail = {
+        email: req.body.user.email
+    };
+    const query = {where: { id: req.params.id }};
+   let updatedUser = await UserModel.update(updateEmail, query)
+    .then((user) => res.status(200).json(user))
+    .catch((err) => res.status(500).json({ error: err }));
+});
+
+//Delete User//
+router.delete("/delete/:id", validateSession, async (req, res) => {  //:id is a parameter
+    
+    try {
+        const query = {
+            where: {
+                id: req.params.id
+            }
+        };
+
+        const userDelete = await UserModel.destroy(query);
+        res.status(200).json({ message: "User Removed", userDelete });
+    } catch (err) {
+        res.status(500).json({ error: err });
+    }
+});
+
 
 module.exports = router;
