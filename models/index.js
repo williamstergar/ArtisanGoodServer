@@ -1,6 +1,7 @@
-const UserModel = require("./user");
+const UserModel = require('./user');
+const ItemModel = require('./artisanitem')
 
 module.exports = {
-    UserModel
+    UserModel,
+    ItemModel
 };
-

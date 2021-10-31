@@ -1,72 +1,105 @@
-module.exports = router
 let express = require("express");
 let router = express.Router();
-
 let validateSession = require("../middleware/validate-jwt");
-const Product = require("../db").import("../models/artisanitem");
+const { ItemModel } = require("../models");
 
 // CREATE ARTISAN ITEM //
-
-router.post('/create', validateSession, async (req, res) => {
-    const artisanItem = {
-        name: req.body.artisanItem.name,
-        price: req.body.artisanItem.price,
-        description: req.body.artisanItem.description,
-        availability: req.body.artisanItem.availability,
-        photoURL: req.body.artisanItem.photoURL
+router.post('/create', validateSession, async (req, res) => { //works
+    const {name, price, description, availability, photoURL} = req.body;
+    const { id } = req.user;
+    const itemEntry = {
+        name,
+        price,
+        description,
+        availability,
+        photoURL,
+        owner_id: id
     }
-
-    artisanItem.create(artisanItemEntry)
-        .then((artisanItems) => res.status(200).json(artisanItems))
-        .catch((err) => res.status(500).json({ error: err }))
-})
-
-router.get("/", (req, res) => {
-    Product.findAll()
-        .then((products) => res.status(200).json(products))
-        .catch((err) => res.status(500).json({error: err}));
+    try {
+        const newItem = await ItemModel.create(itemEntry);
+        res.status(200).json(newItem);
+    } catch (err) {
+        res.status(500).json({ error: err });
+    }
 });
 
-router.get("/owner", validateSession, function (req, res) {
-    let userid = req.user.id;
-
-    Product.findAll({
-        where: {owner: userid },
-    })
-        .then((products) => res.status(200).json(products))
-        .catch((err) => res.status(500).json({err: err}));
-});
-
-router.get("/:name", function (req, res) {
-    let name = req.params.name;
-  
-    Product.findAll({
-      where: { name: name },
-    })
-      .then((products) => res.status(200).json(products))
-      .catch((err) => res.status(500).json({ error: err }));
+router.get("/", async (req, res) => { //works
+    try {
+      const items = await ItemModel.findAll();
+      res.status(200).json(items);
+    } catch (err) {
+      res.status(500).json({error: err});
+    }
   });
-
-  router.put("/edit/:id", validateSession, function (req, res) {
-    const updateProductEntry = {
-      name: req.body.product.name,
-      price: req.body.product.price,
-      description: req.body.product.description,
-      availability: req.body.product.availability,
-      photoURL: req.body.product.photoURL,
+  router.get("/mine", validateSession, async (req, res) => { //works
+    let {id} = req.user;
+    try {
+      const userItems = await ItemModel.findAll({
+        where: {
+          owner_id: id
+        }
+      });
+      res.status(200).json(userItems);
+    }catch (err) {
+      res.status(500).json({ error: err});
+    }
+});
+router.get("/:name", async (req, res) => { //works
+    const {name} = req.params;
+    try {
+      const results = await ItemModel.findAll({
+        where: {name: name}
+      });
+      res.status(200).json(results);
+    } catch (err) {
+      res.status(500).json({ error: err});
+    }
+  });
+  router.put("/update/:entryId", validateSession, async (req, res) => {
+    const {name, price, description, availability, photoURL} = req.body.artisanItem;
+    const itemId = req.params.entryId;
+    const userId = req.user.id;
+    const query = {
+      where: {
+        id: itemId,
+        owner_id: userId
+      }
     };
-    const query = { where: { id: req.params.id, owner: req.user.id } };
-    
-    Product.update(updateProductEntry, query)
-      .then((products) => res.status(200).json(products))
-      .catch((err) => res.status(500).json({ error: err }));
+    const updatedItem = {
+      name: name,
+      price: price,
+      description: description,
+      availability: availability,
+      photoURL: photoURL,
+    }
+    try {
+      const update = await ItemModel.update(updatedItem, query);
+      res.status(200).json(update);
+    } catch (err) {
+      res.status(500).json({ error: err});
+    }
   });
 
-// DELETE ARTISAN ITEM //
-router.delete('/delete/:id', validateSession, async (req, res) => {
-    const query = { where: { id: req.params.id, owner: req.user.id} }
 
-    Product.destroy(query)
-        .then(() => res.status(200).json({ message: 'Product Entry Removed' }))
-        .catch((err) => res.status(500).json({ error: err }))
+  // DELETE ARTISAN ITEM //
+router.delete('/delete/:id', validateSession, async (req, res) => {
+    const userId = req.user.id;
+    const itemId = req.params.id
+
+    try {
+        const query = {
+            where: {
+                id: itemId,
+                owner_id: userId
+            }
+        }
+        await ItemModel.destroy(query)
+        res.status(200).json({ message: 'Item has successfully been deleted' })
+    } catch (err) {
+        res.status(500).json({
+            message: 'Failed to delete item'
+        })
+    }
 })
+
+module.exports = router;
