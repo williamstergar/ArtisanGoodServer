@@ -3,8 +3,8 @@ let router = express.Router();
 let validateSession = require("../middleware/validate-jwt");
 const { ItemModel } = require("../models");
 
-// CREATE ARTISAN ITEM //
-router.post('/create', validateSession, async (req, res) => { //works
+// CREATE ARTISAN ITEM 
+router.post('/create', validateSession, async (req, res) => { 
     const {name, price, description, availability, photoURL} = req.body;
     const { id } = req.user;
     const itemEntry = {
@@ -23,7 +23,8 @@ router.post('/create', validateSession, async (req, res) => { //works
     }
 });
 
-router.get("/", async (req, res) => { //works
+//GET ALL ITEMS
+router.get("/", async (req, res) => { 
     try {
       const items = await ItemModel.findAll();
       res.status(200).json(items);
@@ -31,7 +32,9 @@ router.get("/", async (req, res) => { //works
       res.status(500).json({error: err});
     }
   });
-  router.get("/mine", validateSession, async (req, res) => { //works
+
+  //GET ITEMS BY THE USER THAT IS LOGGED IN
+  router.get("/mine", validateSession, async (req, res) => { 
     let {id} = req.user;
     try {
       const userItems = await ItemModel.findAll({
@@ -44,7 +47,9 @@ router.get("/", async (req, res) => { //works
       res.status(500).json({ error: err});
     }
 });
-router.get("/:name", async (req, res) => { //works
+
+//GET ITEMS BY NAME OF ITEM
+router.get("/:name", async (req, res) => { 
     const {name} = req.params;
     try {
       const results = await ItemModel.findAll({
@@ -55,6 +60,8 @@ router.get("/:name", async (req, res) => { //works
       res.status(500).json({ error: err});
     }
   });
+
+  //UPDATE ITEM
   router.put("/update/:entryId", validateSession, async (req, res) => {
     const {name, price, description, availability, photoURL} = req.body.artisanItem;
     const itemId = req.params.entryId;
@@ -81,7 +88,7 @@ router.get("/:name", async (req, res) => { //works
   });
 
 
-  // DELETE ARTISAN ITEM //
+  // DELETE ARTISAN ITEM 
 router.delete('/delete/:id', validateSession, async (req, res) => {
     const userId = req.user.id;
     const itemId = req.params.id
